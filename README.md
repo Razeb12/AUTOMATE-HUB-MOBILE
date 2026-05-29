@@ -1,56 +1,80 @@
-# Welcome to your Expo app 👋
+# Automat Hub Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is the mobile companion app for the **Automat OBD-II Live Data Pipeline**, built with React Native and Expo. It securely connects to the backend to stream and beautifully visualize real-time vehicle telemetry data (RPM, Speed, Coolant Temp) over WebSockets.
 
-## Get started
+## 🚀 Getting Started
 
-1. Install dependencies
+### 1. Environment Setup
 
-   ```bash
-   npm install
-   ```
+Before running the application, you must configure your environment variables so the app knows how to communicate with the backend. 
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+Copy the example environment file:
 ```bash
-npm run reset-project
+cp .env.example .env
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Ensure `.env` contains the correct URLs pointing to your backend (use your local IP address if testing on a physical device, or `127.0.0.1` if using an iOS simulator):
+```env
+EXPO_PUBLIC_API_URL=http://127.0.0.1:8000
+EXPO_PUBLIC_WS_URL=ws://127.0.0.1:8000
+```
 
-### Other setup steps
+### 2. Install Dependencies
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npm install
+```
 
-## Learn more
+### 3. Start the App
 
-To learn more about developing your project with Expo, look at the following resources:
+Start the Expo Metro Bundler. We recommend using the `-c` flag to clear the cache and ensure your `.env` variables are correctly injected.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo start -c
+```
 
-## Join the community
+Once the bundler starts, press `i` to open the iOS simulator, `a` for Android, or scan the QR code using the **Expo Go** app on your physical device.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🏗️ Project Structure
+
+We follow a **Feature-Sliced "Screaming" Architecture** to keep concerns strictly separated and maintainable.
+
+```text
+automat-mobile/
+├── App.tsx                     # App entry point & global providers
+├── .env                        # Local environment variables
+└── src/
+    ├── navigation/             # Core routing and navigators
+    │   └── AppNavigator.tsx    
+    │
+    ├── auth/                   # Authentication Domain
+    │   ├── guards/             # Route protection logic
+    │   ├── hooks/              # Login API requests
+    │   ├── screens/            # Login UI
+    │   └── services/           # Secure token storage (expo-secure-store)
+    │
+    ├── telemetry/              # Telemetry & Dashboard Domain
+    │   ├── components/         # Gauges, Banners, Pulse indicators
+    │   ├── hooks/              # Frame throttling & WebSocket bridging
+    │   ├── screens/            # Main Dashboard UI
+    │   └── store/              # Global Zustand state for real-time data
+    │
+    ├── websocket/              # Infrastructure Layer
+    │   ├── OBDWebSocketService # Core WS client managing connections
+    │   ├── AppStateWatcher     # Reacts to app foreground/background
+    │   └── ReconnectStrategy   # Exponential backoff algorithm
+    │
+    └── shared/                 # Shared Utilities
+```
+
+---
+
+## ✨ Features
+
+- **Secure Authentication**: Validates the user's API Key against the backend, retrieves a JWT, and securely stores it in the device's native Keychain/SecureStore.
+- **Robust WebSockets**: Implements an aggressive WebSocket manager that handles graceful disconnects, AppState changes (backgrounding), and automatic reconnections using an Exponential Backoff strategy.
+- **High-Performance Rendering**: Utilizes `useFrameThrottle` to throttle incoming 60Hz high-frequency WebSocket frames down to 16ms render intervals to prevent React Native bridge congestion.
+- **State Management**: Uses `zustand` to cleanly share telemetry state across decoupled Dashboard components.
+- **Dynamic Gauges**: Implements custom SVG animations for Speed, RPM, and Coolant Temperature gauges, changing colors smoothly as thresholds (Warn/Critical) are crossed.
