@@ -27,7 +27,7 @@ npm install
 
 ### 3. Start the App
 
-Start the Expo Metro Bundler. We recommend using the `-c` flag to clear the cache and ensure your `.env` variables are correctly injected.
+Start the Expo Metro Bundler. I recommend using the `-c` flag to clear the cache and ensure your `.env` variables are correctly injected.
 
 ```bash
 npx expo start -c
@@ -39,7 +39,7 @@ Once the bundler starts, press `i` to open the iOS simulator, `a` for Android, o
 
 ## 🏗️ Project Structure
 
-We follow a **Feature-Sliced "Screaming" Architecture** to keep concerns strictly separated and maintainable.
+I follow a **Feature-Sliced "Screaming" Architecture** to keep concerns strictly separated and maintainable.
 
 ```text
 automat-mobile/
